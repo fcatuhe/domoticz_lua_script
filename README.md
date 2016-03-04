@@ -1,1 +1,1 @@
-# domoticz_script
+# domoticz_lua_script
