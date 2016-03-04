@@ -6,7 +6,7 @@
 -- Settings
 -----------------------------------------------------------------------------------------------
 -- Define the EmonCMS write API key
-apikey = '78cac2de5d1ab94c2ee8bc92e790c0b3'
+apikey = 'your_api_key_here'
 
 
 
