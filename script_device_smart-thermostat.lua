@@ -1,35 +1,35 @@
 -----------------------------------------------------------------------------------------------
--- Instructions
+--	Instructions
 -----------------------------------------------------------------------------------------------
--- This script is a Smart Thermostat, that needs 4 device types for each group. It can manage
--- multiple groups, e.g. Living Room, Kitchen, Bath Room. Group names must not contain the
--- character '_'.
--- 1. A physical temperature sensor, named 'T-groupname', e.g. 'T-Kitchen'.
--- 2. A virtual switch to turn the heating on or off, named 'H-groupname', e.g. 'H-Kitchen'.
--- 3. A virtual setpoint device to set the target temperature, named 'S-groupname', e.g.
---    'S-Kitchen'.
--- 4. Up to nine physical radiator switches, that can be inverted or not (useful in France for
---    'fil pilote' command of radiators), named 'R1-groupname' to 'R9-groupname', or
---    'R1i-groupname' to 'R9i-groupname' for inverted switches. Ordinary and inverted switches
---    can be mixed, e.g. 'R1-Kitchen', 'R2i-Kitchen' and 'R3-Kitchen'.
--- 5. A User Variable 'Debug', Integer and set to 1 or 0 to show or hide entries in the log.
+--	This script is a Smart Thermostat, that needs 4 device types for each group. It can manage
+--	multiple groups, e.g. Living Room, Kitchen, Bath Room. Group names must not contain the
+--	character '_'.
+--	1.	A physical temperature sensor, named 'T-groupname', e.g. 'T-Kitchen'.
+--	2.	A virtual switch to turn the heating on or off, named 'H-groupname', e.g. 'H-Kitchen'.
+--	3.	A virtual setpoint device to set the target temperature, named 'S-groupname', e.g.
+--			'S-Kitchen'.
+--	4.	Up to nine physical radiator switches, that can be inverted or not (useful in France for
+--			'fil pilote' command of radiators), named 'R1-groupname' to 'R9-groupname', or
+--			'R1i-groupname' to 'R9i-groupname' for inverted switches. Ordinary and inverted switches
+--			can be mixed, e.g. 'R1-Kitchen', 'R2i-Kitchen' and 'R3-Kitchen'.
+--	5.	A User Variable 'Debug', Integer and set to 1 or 0 to show or hide entries in the log.
 
 -----------------------------------------------------------------------------------------------
 -- Settings
 -----------------------------------------------------------------------------------------------
---  Define a delay between command switches, to prevent multiple quick changes
+--	Define a delay between command switches, to prevent multiple quick changes
 local commanddelay = 120 -- 2 minutes
---  Define a delay between two repeat commands, for devices without return receipt
+--	Define a delay between two repeat commands, for devices without return receipt
 local repeatdelay = 600 -- 10 minutes
 
 
 
 -----------------------------------------------------------------------------------------------
--- NOTHING SHOULD NEED TO CHANGE BELOW THIS LINE
+--	NOTHING SHOULD NEED TO CHANGE BELOW THIS LINE
 -----------------------------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------------------------
--- Functions
+--	Functions
 -----------------------------------------------------------------------------------------------
 
 commandArray = {}
@@ -53,33 +53,33 @@ function timedifference (s)
 end
 
 function state (rt,ref) -- compare first radiator device state with a reference (On or Off)
-  if(rt[1]:sub(3,3)~='i') then
-    return otherdevices[rt[1]]==ref
-  else
-    return otherdevices[rt[1]]~=ref
-  end
+	if(rt[1]:sub(3,3)~='i') then
+		return otherdevices[rt[1]]==ref
+	else
+		return otherdevices[rt[1]]~=ref
+	end
 end
 
 function switch (rt,order) -- switches all radiator devices in table according to order (On or Off)
-  local i=1
-  while i  <= n do
-    if(rt[i]:sub(3,3)~='i') then
-      commandArray[rt[i]] = order
-    else
-      if(order == 'On') then
-        commandArray[rt[i]] = 'Off'
-      elseif(order == 'Off') then
-        commandArray[rt[i]] = 'On'
-      end
-    end
-    debuglog(rt[i]..' switching '..order)
-    i = i+1
-  end
-  return true
+	local i=1
+	while i  <= n do
+		if(rt[i]:sub(3,3)~='i') then
+			commandArray[rt[i]] = order
+		else
+			if(order == 'On') then
+				commandArray[rt[i]] = 'Off'
+			elseif(order == 'Off') then
+				commandArray[rt[i]] = 'On'
+			end
+		end
+		debuglog(rt[i]..' switching '..order)
+		i = i+1
+	end
+	return true
 end
 
 -----------------------------------------------------------------------------------------------
--- Thermostat algorithm
+--	Thermostat algorithm
 -----------------------------------------------------------------------------------------------
 
 local dc=next(devicechanged)
@@ -90,7 +90,7 @@ if (dcs:sub(1,1) == 'T') then -- if device changed is a temperature sensor
   if (dcs:find('_') == nil) then l=dcs:len() else l=dcs:find('_')-1 end
   local tcn=dcs:sub(1,l) -- temperature changed name
   local vc=otherdevices_svalues[tcn] -- value changed
-  local vcs=tostring(vc) -- value changed string
+--  local vcs=tostring(vc) -- value changed string
 
   gn=tcn:sub(3) -- group name
 
@@ -116,7 +116,7 @@ if (dcs:sub(1,1) == 'T') then -- if device changed is a temperature sensor
   if (otherdevices[hd]~=nil and otherdevices[sd]~=nil and n>0) then -- check if all devices needed for thermostat are present
     debuglog('HD and SD and RD OK')
     local st = tonumber(otherdevices_svalues[sd]) -- setpoint temperature
-    local ct = tonumber(vcs:sub(1,4)) -- current temperature
+    local ct = tonumber(vc:match("[^;]*")) -- current temperature
     debuglog('Setpoint = ' .. tostring(st) .. ' - Current = ' .. tostring(ct))
     if ((otherdevices[hd]=='On') and (ct < st)) then -- conditions for turning radiators On
       debuglog('Heating On')
@@ -157,6 +157,6 @@ if (dcs:sub(1,1) == 'T') then -- if device changed is a temperature sensor
       end
     end
   else
-    debuglog('HD or SD or RD missing') -- no action
+  	debuglog('HD or SD or RD missing') -- no action
   end
 end
